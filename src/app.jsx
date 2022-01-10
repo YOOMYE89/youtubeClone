@@ -35,7 +35,7 @@
 
 import React, { useEffect, useState } from 'react';
 import './app.css'
-import VideoList from './components/video_list/video-list';
+import VideoList from './components/video_list/video_list';
 import ApiInstance from './js/api'
 
 function App() {
