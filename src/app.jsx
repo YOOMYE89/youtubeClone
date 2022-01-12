@@ -33,27 +33,53 @@
 
 // export default App;
 
-import React, { useEffect, useState } from 'react';
-import './app.css'
+import React, { useCallback, useEffect, useState } from 'react';
+import SearchHeader from './components/search_header/search_header';
 import VideoList from './components/video_list/video_list';
-import ApiInstance from './js/api'
+import styles from './app.module.css'
+import VideoDetail from './components/video_detail/video_detail';
 
-function App() {
+function App({youtube}) {
   const [videos, setVideos] = useState([])
+  const [selectedVideo, setSelectedVideo] = useState(null)
+
+  const selectVideo = (video) => {
+    setSelectedVideo(video)
+  }
+
+  const searchVideo = useCallback((query) => {
+    youtube
+      .search(query)
+      .then(videos => {
+        setVideos(videos)
+        setSelectedVideo(null)
+      })
+  }, [youtube])
 
   // mount가 되었을때만
   useEffect(() => {
-    ApiInstance.get('/search?part=snippet&maxResults=25&q=bts&key=AIzaSyCdv89By7OwgA4Y5E1ITyCKOCZ41vWu428')
-    .then(function (response) {
-      // console.log(response.data );
-      setVideos(response.data.items)
-    })
-    .catch(function (error) {
-      console.log(error);
-    })
-  }, [])
+    youtube
+      .mostPopular()
+      .then(videos => setVideos(videos))
+  }, [youtube])
 
-  return <VideoList videos={videos}/>
+  return (
+    <div className={styles.app}>
+      <SearchHeader searchVideo={searchVideo} />
+      <section className={styles.content}>
+        { 
+        selectedVideo && 
+          <div className={styles.detail}>
+           <VideoDetail video={selectedVideo} /> 
+          </div>
+        }
+        <div className={styles.list}>
+          <VideoList videos={videos} onVideoClick={selectVideo} display={selectedVideo? 'list':'grid'}/>
+        </div>
+        
+      </section>
+    </div>
+  )
 }
 
 export default App
